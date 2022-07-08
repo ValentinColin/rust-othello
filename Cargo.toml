@@ -1,18 +1,19 @@
 [package]
-name = "rust-template-project"
+name = "rust-othello"
 version = "0.1.0"
 authors = ["Valentin Colin <valentin.colin78@gmail.com>"]
 edition = "2021"
-description = "This project serves as the basis for future new projects"
+description = "A game of othello"
 readme = "README.md"
-homepage = "https://github.com/ValentinColin/rust-template-project.git"
-repository = "https://github.com/ValentinColin/rust-template-project.git"
+homepage = "https://github.com/ValentinColin/rust-othello.git"
+repository = "https://github.com/ValentinColin/rust-othello.git"
 license = "MIT"
 # licence-file = "LICENSE"
-keywords = ["template"]
+keywords = ["game"]
 
 [dependencies]
 clippy = {version = "0.0.21", optional = true}
+ggez = "0.7.0"
 
 [features]
 default = []

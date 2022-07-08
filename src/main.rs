@@ -1,17 +1,6 @@
-//! Description of this crate
-//!
-//! Careful to the syntax:
-//!
-//! |               | Inner         | Outer         |
-//! |---------------|:-------------:|:-------------:|
-//! | Line          | //! blabla    | /// blabla    |
-//! | Block         | /*! blabla */ | /** blabla */ |
-//! | attribute     | #![attr]      | #[attr]       |
-//!
-//! - Inner attribute: #![attr]
-//! - Outer attribute: #[attr]
+//! The Othello game
 
-// Good pratice: use these attributes
+// Good practice: use these attributes
 #![deny(missing_docs,
         missing_debug_implementations,
         missing_copy_implementations,
@@ -22,10 +11,19 @@
         unused_import_braces,
         unused_qualifications)]
 
-mod lib;
-use crate::lib::lib_hello;
 
-/// This function returns the greeting: `Hello, world!`
+use crate::player::{Player, PlayerMode};
+
+mod othello;
+mod player;
+mod board;
+mod color;
+
 fn main() {
-    lib_hello();
+
+    let player_one = Player::new("Valentin Colin", color::WHITE, PlayerMode::USER);
+    let player_two = Player::new("Angèle Lafond", color::BLACK, PlayerMode::USER);
+
+    let mut game = Othello::new(player_one, player_two);
+    game.start();
 }
