@@ -35,6 +35,10 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libasound2-dev
 
+      - name: Install udev
+        if: ${{ runner.os == 'Linux' }}
+        run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev
+
       - name: Run cargo check --all-targets w/ -D warnings
         run: cargo check --all-targets
         env:
