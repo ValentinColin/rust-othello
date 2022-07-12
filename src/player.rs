@@ -1,22 +1,17 @@
-use crate::color::Color;
+//! A module that describe players
 
+use std::fmt;
+
+use crate::board::Piece;
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct Player {
-    name: &str,
-    color: Color,
-    mode: PlayerMode,
+    pub(crate) name: &'static str,
+    pub(crate) piece: Piece,
 }
 
-impl Player {
-    pub fn new(name: &str, color: Color, mode: PlayerMode) -> Self {
-        Player {name, color, mode}
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{} ({})", self.name, self.piece)
     }
-}
-
-
-/// Temporary mode of player for debug
-/// - User: classic player
-/// - Dev: god mode that have the possibility to not respect the rule of the game
-pub enum PlayerMode {
-    User,
-    Dev,
 }
