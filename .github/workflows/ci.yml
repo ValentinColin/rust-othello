@@ -17,6 +17,8 @@ jobs:
           - beta
           - nightly
     steps:
+      - name: setup
+        run: sudo apt-get update
       - name: Checkout
         uses: actions/checkout@v3
       - name: Build
