@@ -48,16 +48,16 @@ git clone git@github.com:ValentinColin/rust-othello.git
 cargo build --release
 ```
 
-## Usage
-
-```bash
-cargo run --release
-```
-
 ## Tests
 
 ```bash
 cargo test
+```
+
+## Usage
+
+```bash
+cargo run --release
 ```
 
 <!--
