@@ -39,22 +39,11 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: sudo apt-get update; sudo apt-get install --no-install-recommends libudev-dev
 
-      - name: Run cargo check --all-targets w/ -D warnings
+      - name: Run cargo check
         run: cargo check --all-targets
-        env:
-          RUSTFLAGS: "-D warnings"
-      - name: Run cargo test w/ -D warnings
-        if: ${{ runner.os == 'Linux' }}
-        run: cargo test headless -- --test-threads=1
-        env:
-          RUSTFLAGS: "-D warnings"
 
-      - name: Build
+      - name: Run cargo build
         run: cargo build --verbose
-      - name: Run tests
-        run: cargo test --verbose
-      #- name: Run example simple
-      #  run: cargo run --example simple
-      #- name: Run example multi-file
-      #  run: cargo run --example multi-file-example
 
+      - name: Run cargo test
+        run: cargo test --verbose
