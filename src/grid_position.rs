@@ -1,15 +1,17 @@
 //! A module to help the use of coordinate
 
-use std::cmp::{max, min};
 use std::fmt;
+use std::cmp::{max, min};
 use std::ops::{Add, AddAssign, Sub, SubAssign};
 
 use crate::*;
 
+
+/// Simple struct for manage coordinates in the grid
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub struct GridPosition {
-    pub(crate) x: i16,
-    pub(crate) y: i16,
+    pub x: i16,
+    pub y: i16,
 }
 
 impl GridPosition {
@@ -80,5 +82,52 @@ impl SubAssign for GridPosition {
 impl fmt::Display for GridPosition {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+
+#[cfg(test)]
+mod tests {
+    use crate::GridPosition;
+
+    #[test]
+    fn fmt() {
+        let pos1 = GridPosition { x: -1, y: 0 };
+        let pos2 = GridPosition { x: 10, y: 5 };
+
+        assert_eq!("(-1,0)", format!("{}", pos1).as_str());
+        assert_eq!("(10,5)", format!("{}", pos2).as_str());
+    }
+
+    #[test]
+    fn add() {
+        assert_eq!(
+            GridPosition::new(-1,0) + GridPosition::new(11,5),
+            GridPosition::new(10,5)
+        );
+    }
+
+    #[test]
+    fn sub() {
+        assert_eq!(
+            GridPosition::new(-1,0) - GridPosition::new(11,5),
+            GridPosition::new(-12,-5)
+        );
+    }
+
+    #[test]
+    fn add_assign() {
+        let mut pos1 = GridPosition::new(-1,0);
+        pos1 += GridPosition::new(11,5);
+        assert_eq!(pos1.x, 10);
+        assert_eq!(pos1.y, 5);
+    }
+
+    #[test]
+    fn sub_assign() {
+        let mut pos1 = GridPosition::new(-1,0);
+        pos1 -= GridPosition::new(11,5);
+        assert_eq!(pos1.x, -12);
+        assert_eq!(pos1.y, -5);
     }
 }

@@ -14,6 +14,8 @@ use log::{debug, error};
 // intern crates
 use crate::*;
 
+
+/// Describe a case of the Board
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Piece {
     BLACK,
@@ -22,6 +24,11 @@ pub enum Piece {
 }
 
 impl Piece {
+    /// Return the other color for self
+    ///
+    /// - BLACK => WHITE
+    /// - WHITE => BLACK
+    /// - EMPTY => EMPTY (a log error is send)
     pub fn next(&self) -> Self {
         match self {
             Piece::BLACK => Piece::WHITE,
@@ -33,22 +40,20 @@ impl Piece {
         }
     }
 
+    /// Draw a Piece of the Board at a certain point
+    ///
+    /// - Piece::BLACK => Render by a `black` circle of 80% of the GRID_CELL_SIZE
+    /// - Piece::WHITE => Render by a `white` circle of 80% of the GRID_CELL_SIZE
+    /// - Piece::EMPTY => Not drawn
     fn draw<P>(&self, ctx: &mut Context, point: P) -> GameResult
     where
         P: Into<mint::Point2<f32>>,
     {
-        match self {
-            Piece::BLACK => self.draw_color(ctx, point, Color::BLACK)?,
-            Piece::WHITE => self.draw_color(ctx, point, Color::WHITE)?,
-            Piece::EMPTY => {}
-        }
-        Ok(())
-    }
-
-    fn draw_color<P>(&self, ctx: &mut Context, point: P, color: Color) -> GameResult
-    where
-        P: Into<mint::Point2<f32>>,
-    {
+        let color = match self {
+            Piece::BLACK => Color::BLACK,
+            Piece::WHITE => Color::WHITE,
+            Piece::EMPTY => return Ok(()),
+        };
         let mesh = graphics::MeshBuilder::new()
             .circle(
                 graphics::DrawMode::fill(),
@@ -81,6 +86,8 @@ impl fmt::Display for Piece {
 
 pub struct Board {
     board: Grid<Piece>,
+    //historic: Vec<GridPosition>,
+    //theme: Theme,
 }
 
 impl Board {
@@ -462,7 +469,28 @@ impl Default for Board {
 }
 
 #[cfg(test)]
-mod tests {
+mod tests_piece {
+    use crate::Piece;
+
+    #[test]
+    fn fmt() {
+        let piece_black = Piece::BLACK;
+        let piece_white = Piece::WHITE;
+        let piece_empty = Piece::EMPTY;
+
+        assert_eq!("BLACK", format!("{}", piece_black));
+        assert_eq!("WHITE", format!("{}", piece_white));
+        assert_eq!("EMPTY", format!("{}", piece_empty));
+    }
+
+    #[test]
+    fn default() {
+        assert_eq!(Piece::default(), Piece::EMPTY);
+    }
+}
+
+#[cfg(test)]
+mod tests_board {
     use crate::{Board, GridPosition, Piece};
     use grid::grid;
 
