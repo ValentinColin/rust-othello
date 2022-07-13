@@ -5,7 +5,6 @@ use std::cmp::{max, min};
 use std::fmt;
 
 // extern crates
-use ggez::graphics::Color;
 use ggez::{graphics, Context, GameResult};
 use glam::Vec2;
 use grid::Grid;
@@ -45,13 +44,13 @@ impl Piece {
     /// - Piece::BLACK => Render by a `black` circle of 80% of the GRID_CELL_SIZE
     /// - Piece::WHITE => Render by a `white` circle of 80% of the GRID_CELL_SIZE
     /// - Piece::EMPTY => Not drawn
-    fn draw<P>(&self, ctx: &mut Context, point: P) -> GameResult
+    fn draw<P>(&self, ctx: &mut Context, theme: Theme, point: P) -> GameResult
     where
         P: Into<mint::Point2<f32>>,
     {
         let color = match self {
-            Piece::BLACK => Color::BLACK,
-            Piece::WHITE => Color::WHITE,
+            Piece::BLACK => theme.piece_colors.0,
+            Piece::WHITE => theme.piece_colors.1,
             Piece::EMPTY => return Ok(()),
         };
         let mesh = graphics::MeshBuilder::new()
@@ -329,6 +328,11 @@ impl Board {
         directions
     }
 
+    /// Verify if the board can't be upgrade (i.e the game is finish)
+    pub fn is_finish(&self) -> bool {
+        !self.can_play(Piece::BLACK) && !self.can_play(Piece::WHITE)
+    }
+
     /// Verify if a player can play with the actual board
     pub fn can_play(&self, player_piece: Piece) -> bool {
         self.get_valid_moves(player_piece).len() > 0
@@ -373,8 +377,18 @@ impl Board {
         score
     }
 
+    /// Draw all the board (grid + pieces + valid moves)
+    pub fn draw(&self, ctx: &mut Context, player_piece: Piece, theme: Theme) -> GameResult {
+        Board::draw_empty_board(ctx, theme)?;
+        self.draw_content_board(ctx, theme)?;
+        if theme.valid_moves_color.is_some() {
+            self.draw_valid_move(ctx, theme, player_piece)?;
+        }
+        Ok(())
+    }
+
     /// Draw an empty board (only the grid)
-    fn draw_empty_board(ctx: &mut Context) -> GameResult {
+    fn draw_empty_board(ctx: &mut Context, theme: Theme) -> GameResult {
         // horizontal line
         for y in 1..GRID_SIZE.1 {
             let mesh = graphics::MeshBuilder::new()
@@ -387,7 +401,7 @@ impl Board {
                         ),
                     ],
                     2.0,
-                    Color::new(1.0, 1.0, 1.0, 1.0),
+                    theme.grid_color,
                 )?
                 .build(ctx)?;
             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
@@ -404,7 +418,7 @@ impl Board {
                         ),
                     ],
                     2.0,
-                    Color::new(1.0, 1.0, 1.0, 1.0),
+                    theme.grid_color,
                 )?
                 .build(ctx)?;
             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
@@ -413,7 +427,7 @@ impl Board {
     }
 
     /// Draw the content of the board (only pieces)
-    fn draw_content_board(&self, ctx: &mut Context) -> GameResult {
+    fn draw_content_board(&self, ctx: &mut Context, theme: Theme) -> GameResult {
         for y in 0..GRID_SIZE.1 {
             for x in 0..GRID_SIZE.0 {
                 if self.board[y as usize][x as usize] == Piece::EMPTY {
@@ -423,14 +437,14 @@ impl Board {
                     (x * GRID_CELL_SIZE.0) as f32 + GRID_CELL_SIZE.0 as f32 / 2.0,
                     (y * GRID_CELL_SIZE.1) as f32 + GRID_CELL_SIZE.1 as f32 / 2.0,
                 );
-                self.board[y as usize][x as usize].draw(ctx, center)?;
+                self.board[y as usize][x as usize].draw(ctx, theme, center)?;
             }
         }
         Ok(())
     }
 
     /// Draw all the valid move for the current player
-    fn draw_valid_move(&self, ctx: &mut Context, player_piece: Piece) -> GameResult {
+    fn draw_valid_move(&self, ctx: &mut Context, theme: Theme, player_piece: Piece) -> GameResult {
         let mut center;
         for position in self.get_valid_moves(player_piece).iter() {
             center = Vec2::new(
@@ -443,19 +457,11 @@ impl Board {
                     center,
                     3.0 * min(GRID_CELL_SIZE.0, GRID_CELL_SIZE.1) as f32 / 10.0,
                     1.0,
-                    Color::RED,
+                    theme.valid_moves_color.unwrap(),
                 )?
                 .build(ctx)?;
             graphics::draw(ctx, &mesh, graphics::DrawParam::default())?;
         }
-        Ok(())
-    }
-
-    /// Draw all the board (grid + pieces + valid moves)
-    pub fn draw(&self, ctx: &mut Context, player_piece: Piece) -> GameResult {
-        Board::draw_empty_board(ctx)?;
-        self.draw_content_board(ctx)?;
-        self.draw_valid_move(ctx, player_piece)?;
         Ok(())
     }
 }

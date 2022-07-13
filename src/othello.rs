@@ -1,8 +1,8 @@
 //! The main module that manage the game logic
 
-use ggez::{Context, event, GameResult, graphics};
+use ggez::{Context, event, GameResult};
 use ggez::event::{KeyCode, MouseButton};
-use ggez::graphics::Color;
+use ggez::graphics::{self, Color, Rect};
 use log::{debug, error, info};
 
 use crate::*;
@@ -15,20 +15,22 @@ pub struct Othello {
     current_player: Player,
     current_move: Option<GridPosition>,
     current_player_has_played: bool,
-    gameover: bool
+    gameover: bool,
+    theme: Theme,
 }
 
 impl Othello {
     /// Create a new game
-    pub fn new(player_black: Player, player_white: Player, board: Board) -> Self {
+    pub fn new(player_black: Player, player_white: Player) -> Self {
         Othello {
-            board,
+            board: Board::default(),
             player_black,
             player_white,
-            current_player: player_white,
+            current_player: player_black,
             current_move: None,
             current_player_has_played: false,
             gameover: false,
+            theme: DEFAULT_THEME,
         }
     }
 
@@ -41,9 +43,22 @@ impl Othello {
         self.gameover = false;
     }
 
+    /// Set the board of the game
+    pub fn set_board(mut self, board: Board) -> Self {
+        self.board = board;
+        self
+    }
+
+    /// Set the theme of the game
+    pub fn set_theme(mut self, theme: Theme) -> Self {
+        self.theme = theme;
+        self
+    }
+
+
     /// Ask if the game is over
     fn is_over(&self) -> bool {
-        self.board.is_full()
+        self.board.is_finish()
     }
 
     /// action to do when the user click
@@ -78,7 +93,7 @@ impl Othello {
     }
 
     /// Draw the score on the screen
-    fn scores(&self) -> (u8, u8) {
+    fn score(&self) -> (u8, u8) {
         debug!("the score is:\n\t{}: {}\n\t{}: {}",
             self.player_black, self.board.score(self.player_black),
             self.player_white, self.board.score(self.player_white)
@@ -87,21 +102,46 @@ impl Othello {
     }
 
     /// Draw the score on the screen
-    fn draw_score(&self, _ctx: &mut Context) -> GameResult {
-        // todo!("Draw a rect that print the scores")
-        #[allow(unused)]
-        let (score_black, score_white) = self.scores();
+    fn draw_score(&self, ctx: &mut Context) -> GameResult {
+        let (score_black, score_white) = self.score();
+
+        // Draw the background of the popup
+        let popup = graphics::MeshBuilder::new()
+            .rounded_rectangle(
+                graphics::DrawMode::fill(),
+                Rect::new(
+                    SCREEN_SIZE.0 as f32 / 4.0,
+                    SCREEN_SIZE.1 as f32 / 4.0,
+                    SCREEN_SIZE.0 as f32 / 2.0,
+                    SCREEN_SIZE.1 as f32 / 2.0,
+                ),
+                50.0,
+                Color::new(0.5, 0.5, 0.5, 1.0)
+            )?
+            .build(ctx)?;
+        graphics::draw(ctx, &popup, graphics::DrawParam::default())?;
+
+        // Set and draw the text in the popup
+        let text_format = format!("{}: {}\n\t{}: {}",
+            self.player_black, score_black,
+            self.player_white, score_white
+        );
+
+        let font = graphics::Font::new(ctx, self.theme.font_path)?;
+        let text = graphics::Text::new((text_format.as_str(), font, self.theme.font_scale));
+        let dest_point = glam::Vec2::new(300.0, 300.0);
+        graphics::draw(ctx, &text, (dest_point,))?;
+
         Ok(())
     }
 }
 
 impl event::EventHandler<ggez::GameError> for Othello {
     /// Update will happen on every frame before it is drawn.
-    fn update(&mut self, ctx: &mut Context) -> GameResult {
+    fn update(&mut self, _ctx: &mut Context) -> GameResult {
         if ! self.gameover {
             if self.is_over() {
                 self.gameover = true;
-                self.draw_score(ctx)?;
             } else if self.current_player_has_played {
                 self.board.update(
                     self.current_move.unwrap(),
@@ -119,10 +159,15 @@ impl event::EventHandler<ggez::GameError> for Othello {
     /// Render the game's current state.
     fn draw(&mut self, ctx: &mut Context) -> GameResult {
         // First we clear the screen and set the background color
-        graphics::clear(ctx, Color::GREEN);
+        graphics::clear(ctx, self.theme.background_color);
 
         // Draw the board and his content
-        self.board.draw(ctx, self.current_player.piece)?;
+        self.board.draw(ctx, self.current_player.piece, self.theme)?;
+
+        // If the game is over draw a popup to show the score
+        if self.gameover {
+            self.draw_score(ctx)?;
+        }
 
         // Finally we call graphics::present to cycle the gpu's framebuffer and display
         // the new frame we just drew.
@@ -157,7 +202,7 @@ impl event::EventHandler<ggez::GameError> for Othello {
         match keycode {
             KeyCode::Escape => {info!("EXIT from key Escape"); event::quit(ctx);},
             KeyCode::R => {debug!("RESET from key R"); self.reset();},
-            KeyCode::S => {debug!("SCORE from key S"); self.scores();},
+            KeyCode::S => {debug!("SCORE from key S"); self.score();},
             _ => {}
         };
     }
