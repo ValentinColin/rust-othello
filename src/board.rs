@@ -83,6 +83,7 @@ impl fmt::Display for Piece {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct Board {
     board: Grid<Piece>,
     //historic: Vec<GridPosition>,
@@ -122,7 +123,7 @@ impl Board {
 
     /// Manually set the board
     ///
-    /// ```
+    /// ```rust
     /// use grid::*;
     /// use rust_othello::{Board, Piece};
     ///
@@ -144,14 +145,14 @@ impl Board {
         Board { board }
     }
 
-    /// Set a specific case of the board
-    pub fn set(&mut self, position: GridPosition, piece: Piece) {
-        self.board[position.y as usize][position.x as usize] = piece;
-    }
-
     /// Get a specific case of the board
     pub fn get(&self, position: GridPosition) -> Piece {
         self.board[position.y as usize][position.x as usize]
+    }
+
+    /// Set a specific case of the board
+    pub fn set(&mut self, position: GridPosition, piece: Piece) {
+        self.board[position.y as usize][position.x as usize] = piece;
     }
 
     /// Return the line from the start position to the bound of the board
@@ -353,8 +354,10 @@ impl Board {
 
     /// Verify if the board is full (no Piece::EMPTY)
     pub fn is_full(&self) -> bool {
-        for y in 0..GRID_SIZE.1 {
-            for x in 0..GRID_SIZE.0 {
+        let height: i16 = self.board.rows() as i16;
+        let width: i16 = self.board.cols() as i16;
+        for y in 0..height {
+            for x in 0..width {
                 if self.is_empty(GridPosition::new(x, y)) {
                     return false;
                 }
@@ -364,12 +367,11 @@ impl Board {
     }
 
     /// Compute the score of a player
-    pub fn score(&self, player: Player) -> u8 {
+    pub fn score(&self, player_piece: Piece) -> u8 {
         let mut score = 0;
-        let color: Piece = player.piece;
         for y in 0..GRID_SIZE.1 {
             for x in 0..GRID_SIZE.0 {
-                if self.get(GridPosition::new(x, y)) == color {
+                if self.get(GridPosition::new(x, y)) == player_piece {
                     score += 1;
                 }
             }
@@ -474,6 +476,7 @@ impl Default for Board {
     }
 }
 
+#[allow(unreachable_code)]
 #[cfg(test)]
 mod tests_piece {
     use crate::Piece;
@@ -495,14 +498,110 @@ mod tests_piece {
     }
 }
 
+#[allow(unreachable_code)]
 #[cfg(test)]
 mod tests_board {
     use crate::{Board, GridPosition, Piece};
     use grid::grid;
 
+    const B: Piece = Piece::BLACK;
+    const W: Piece = Piece::WHITE;
+    const E: Piece = Piece::EMPTY;
+
+    #[test]
+    fn get() {
+        let grid = grid![[E,W]
+                                    [B,E]];
+        let board = Board::set_board(grid);
+        assert_eq!(E, board.get(GridPosition {x: 0, y: 0}));
+        assert_eq!(E, board.get(GridPosition {x: 1, y: 1}));
+        assert_eq!(W, board.get(GridPosition {x: 1, y: 0}));
+        assert_eq!(B, board.get(GridPosition {x: 0, y: 1}));
+    }
+
+    #[test]
+    fn set() {
+        let grid = grid![[E,E]
+                                    [E,E]];
+        let mut board = Board::set_board(grid);
+        board.set(GridPosition {x: 1, y: 0}, W);
+        board.set(GridPosition {x: 0, y: 1}, B);
+        assert_eq!(E, board.get(GridPosition::new(0, 0)));
+        assert_eq!(E, board.get(GridPosition::new(1, 1)));
+        assert_eq!(W, board.get(GridPosition::new(1, 0)));
+        assert_eq!(B, board.get(GridPosition::new(0, 1)));
+    }
+
+    #[test]
+    fn update() {
+        let grid = grid![[B,E,E,E,B,E,E,E]
+                                    [E,W,E,E,W,E,E,B]
+                                    [E,E,B,E,W,E,W,E]
+                                    [E,E,E,W,E,B,E,E]
+                                    [B,W,B,E,E,E,E,B]
+                                    [E,E,E,E,W,W,E,E]
+                                    [E,E,W,E,W,E,B,E]
+                                    [E,B,E,E,B,E,E,E]];
+        let mut board = Board::set_board(grid);
+        board.update(GridPosition::new(4, 4), Piece::BLACK);
+
+        let expected_grid = grid![[B,E,E,E,B,E,E,E]
+                                          [E,W,E,E,W,E,E,B]
+                                          [E,E,B,E,W,E,W,E]
+                                          [E,E,E,B,E,B,E,E]
+                                          [B,W,B,E,B,E,E,B]
+                                          [E,E,E,E,B,B,E,E]
+                                          [E,E,W,E,B,E,B,E]
+                                          [E,B,E,E,B,E,E,E]];
+        let expected_board = Board::set_board(expected_grid);
+
+        assert_eq!(board, expected_board);
+    }
+
+    #[test]
+    #[ignore]
+    fn get_line() {
+        todo!();
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    #[ignore]
+    fn get_end_line() {
+        todo!();
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    #[ignore]
+    fn is_valid_move() {
+        todo!();
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    #[ignore]
+    fn get_valid_moves() {
+        todo!();
+        assert_eq!(true, true);
+    }
+
+    #[test]
+    #[ignore]
+    fn is_finish() {
+        todo!();
+        assert!(true);
+    }
+
+    #[test]
+    #[ignore]
+    fn can_play() {
+        todo!();
+        assert!(true);
+    }
+
     #[test]
     fn in_board() {
-        const E: Piece = Piece::EMPTY;
         let grid = grid![[E,E]
                                     [E,E]];
         let board = Board::set_board(grid);
@@ -514,11 +613,45 @@ mod tests_board {
         assert!(board.in_board(GridPosition::new(1, 1)));
 
         // assert false (see the '!')
-        assert!(!board.in_board(GridPosition::new(-1, 0)));
-        assert!(!board.in_board(GridPosition::new(0, -1)));
-        assert!(!board.in_board(GridPosition::new(-1, -1)));
-        assert!(!board.in_board(GridPosition::new(0, 2)));
-        assert!(!board.in_board(GridPosition::new(2, 0)));
-        assert!(!board.in_board(GridPosition::new(2, 2)));
+        assert!( ! board.in_board(GridPosition::new(-1, 0)));
+        assert!( ! board.in_board(GridPosition::new(0, -1)));
+        assert!( ! board.in_board(GridPosition::new(-1, -1)));
+        assert!( ! board.in_board(GridPosition::new(0, 2)));
+        assert!( ! board.in_board(GridPosition::new(2, 0)));
+        assert!( ! board.in_board(GridPosition::new(2, 2)));
+    }
+
+    #[test]
+    fn is_empty() {
+        let grid = grid![[E,E]
+                                    [E,E]];
+        let board = Board::set_board(grid);
+        assert!(board.is_empty(GridPosition::new(0, 0)));
+        assert!(board.is_empty(GridPosition::new(1, 0)));
+        assert!(board.is_empty(GridPosition::new(0, 1)));
+        assert!(board.is_empty(GridPosition::new(1, 1)));
+    }
+
+    #[test]
+    fn is_full() {
+        let grid = grid![[W,B]
+                                    [B,W]];
+        let board = Board::set_board(grid);
+        assert!(board.is_full());
+    }
+
+    #[test]
+    fn score() {
+        let grid = grid![[B,E,E,E,B,E,E,E]
+                                    [E,W,E,E,W,E,E,B]
+                                    [E,E,B,E,W,E,W,E]
+                                    [E,E,E,W,E,B,E,E]
+                                    [B,W,B,E,E,E,E,B]
+                                    [E,E,E,E,W,W,E,E]
+                                    [E,E,W,E,W,E,B,E]
+                                    [E,B,E,E,B,E,E,E]];
+        let board = Board::set_board(grid);
+        assert_eq!(board.score(B), 11);
+        assert_eq!(board.score(W), 10);
     }
 }

@@ -93,12 +93,16 @@ impl Othello {
     }
 
     /// Draw the score on the screen
+    ///
+    /// Return (black_score, white_score)
     fn score(&self) -> (u8, u8) {
+        let black_score = self.board.score(self.player_black.piece);
+        let white_score = self.board.score(self.player_white.piece);
         debug!("the score is:\n\t{}: {}\n\t{}: {}",
-            self.player_black, self.board.score(self.player_black),
-            self.player_white, self.board.score(self.player_white)
+            self.player_black, black_score,
+            self.player_white, white_score
         );
-        (self.board.score(self.player_black), self.board.score(self.player_white))
+        (black_score, white_score)
     }
 
     /// Draw the score on the screen

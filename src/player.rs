@@ -17,6 +17,7 @@ impl fmt::Display for Player {
     }
 }
 
+#[allow(unreachable_code)]
 #[cfg(test)]
 mod tests {
     use crate::{Piece, Player};

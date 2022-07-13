@@ -85,7 +85,7 @@ impl fmt::Display for GridPosition {
     }
 }
 
-
+#[allow(unreachable_code)]
 #[cfg(test)]
 mod tests {
     use crate::GridPosition;
