@@ -1,5 +1,7 @@
 //! Example of a specific case of othello
 
+use std::path::PathBuf;
+
 use ggez::{event, GameResult};
 use env_logger;
 use grid::*;
@@ -20,9 +22,13 @@ fn main() -> GameResult {
     let context_builder = ggez::ContextBuilder::new(
         env!("CARGO_PKG_NAME"),
         env!("CARGO_PKG_AUTHORS"))
+        .add_resource_path::<PathBuf>(
+            [env!("CARGO_MANIFEST_DIR"), "resources"].iter().collect()
+        )
         // Next we set up the window. This title will be displayed in the title bar of the window.
         .window_setup(ggez::conf::WindowSetup::default()
             .title("Othello Example 1")
+            .icon("/icon_window.png")
         )
         // Now we get to set the size of the window, which we use our SCREEN_SIZE constant from earlier to help with
         .window_mode(ggez::conf::WindowMode::default()
@@ -45,7 +51,7 @@ fn main() -> GameResult {
     let board = Board::set_board(grid);
 
     // Next we create a new instance of our Game struct, which implements EventHandler
-    let state = Othello::new(PLAYER_ONE, PLAYER_TWO, board);
+    let state = Othello::new(PLAYER_ONE, PLAYER_TWO).set_board(board);
 
     // And finally we actually run our game, passing in our context, event_loop and state.
     event::run(ctx, event_loop, state)
