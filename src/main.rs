@@ -13,6 +13,7 @@
 
 
 use std::env;
+use std::path::PathBuf;
 
 use env_logger;
 use ggez::{event, GameResult};
@@ -28,9 +29,13 @@ fn main() -> GameResult {
     let context_builder = ggez::ContextBuilder::new(
         env!("CARGO_PKG_NAME"),
         env!("CARGO_PKG_AUTHORS"))
+        .add_resource_path::<PathBuf>(
+            [env!("CARGO_MANIFEST_DIR"), "resources"].iter().collect()
+        )
         // Next we set up the window. This title will be displayed in the title bar of the window.
         .window_setup(ggez::conf::WindowSetup::default()
             .title("Othello")
+            .icon("/icon_window.png")
         )
         // Now we get to set the size of the window, which we use our SCREEN_SIZE constant from earlier to help with
         .window_mode(ggez::conf::WindowMode::default()
