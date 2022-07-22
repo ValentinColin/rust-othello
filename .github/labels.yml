@@ -31,7 +31,7 @@
 - name: 'priority: low'
   color: '0E8A16'
 
-- name: 'status: can't reproduce'
+- name: "status: can't reproduce"
   color: 'FEC1C1'
 - name: 'status: confirmed'
   color: '215CEA'
