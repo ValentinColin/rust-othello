@@ -7,7 +7,7 @@
 
 - name: 'type: bug'
   color: 'D73A4A'
-  description: 'Something isn't working'
+  description: "Something isn't working"
 - name: 'type: discussion'
   color: 'D4C5F9'
 - name: 'type: documention'
